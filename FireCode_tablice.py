@@ -131,7 +131,7 @@ class Decoder(GF2):
             print 'Poprawne'
         else:
             print 'Wystapil blad'
-            print 'Odebrane:\n' + str(self.recv.value)
+            print 'Odebrane:\n' + str((self.recv + self.rest).value)
             ones = str(syndrom.value).count('1')
             (min_syn, iteracja, s) = (ones, 0, list(syndrom.value))
 
@@ -154,19 +154,22 @@ class Decoder(GF2):
                     (min_syn, iteracja, s) = (ones, i, list(syndrom.value))
 
             correct = actual + self.rest
-
-            if min_syn > 10:
+            print min_syn
+            print iteracja
+            if min_syn > 12:
                 print 'Nie mozna poprawic bledow'
                 return
             else:
                 for k in range(i):
-                    if i-k == iteracja:
-                        correct = correct + GF2(s)
                     if (correct.value[-1]) == 0:
                         correct.value.insert(0, 0)
                     else:
                         correct.value.insert(0, 1)
                     del correct.value[-1]
+
+                    if i-1-k == iteracja:
+                        print 'dodajemy'
+                        correct = correct + GF2(s)
 
             return correct
     
@@ -185,14 +188,20 @@ if __name__ == '__main__':
     print poprawny.value
     
     rest = rest + GF2('10')
-    result.value[6] = result.value[6] ^ 1
-    result.value[10] = result.value[10] ^ 1
-
+    result.value[2] = result.value[2] ^ 1
+    result.value[37] = result.value[37] ^ 1
+    #zeros = ''.join(['0' for x in range(40)])
+    #result = result + GF2('111100000'+zeros)
     decoder = Decoder((result, rest), b)
     
     naprawione = decoder.check()
-    print 'Wartosc poprawna XOR wartosc po naprawieniu'
-    print (poprawny + naprawione).value
-    print 'liczba rozniacych sie bitow: ' + str(((poprawny + naprawione).value).count(1))
+    try:
+        print naprawione.value
+        
+        print 'Wartosc poprawna XOR wartosc po naprawieniu'
+        print (poprawny + naprawione).value
+        print 'liczba rozniacych sie bitow: ' + str(((poprawny + naprawione).value).count(1))
+    except:
+        pass
 
     
