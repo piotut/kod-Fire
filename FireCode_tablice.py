@@ -130,8 +130,8 @@ class Decoder(GF2):
         if syndrom.value == [0]:
             print 'Poprawne'
         else:
-            print 'Wystapil blad'
-            print 'Odebrane:\n' + str((self.recv + self.rest).value)
+            #print 'Wystapil blad'
+            #print 'Odebrane:\n' + str((self.recv + self.rest).value)
             ones = str(syndrom.value).count('1')
             (min_syn, iteracja, s) = (ones, 0, list(syndrom.value))
 
@@ -154,10 +154,10 @@ class Decoder(GF2):
                     (min_syn, iteracja, s) = (ones, i, list(syndrom.value))
 
             correct = actual + self.rest
-            print min_syn
-            print iteracja
+            #print min_syn
+            #print iteracja
             if min_syn > 12:
-                print 'Nie mozna poprawic bledow'
+                #print 'Nie mozna poprawic bledow'
                 return
             else:
                 for k in range(i):
@@ -168,7 +168,7 @@ class Decoder(GF2):
                     del correct.value[-1]
 
                     if i-1-k == iteracja:
-                        print 'dodajemy'
+                        #print 'dodajemy'
                         correct = correct + GF2(s)
 
             return correct
@@ -190,8 +190,19 @@ if __name__ == '__main__':
     rest = rest + GF2('10')
     result.value[2] = result.value[2] ^ 1
     result.value[37] = result.value[37] ^ 1
-    #zeros = ''.join(['0' for x in range(40)])
-    #result = result + GF2('111100000'+zeros)
+    ##zeros = ''.join(['0' for x in range(40)])
+    ##result = result + GF2('111100000'+zeros)
+    #num = randint(0, 184-5)
+    #zeros = [0 for x in range(224)]
+    #for n, j in enumerate(range(5)):
+    #    zeros[num+n] = 1
+    #error = ''.join(str(x) for x in zeros)
+    #print len(error)
+    #print error
+    #decoder = self.information_error()
+    #repaired = decoder.check()
+    #self.check(repaired, 'blednych bitow %d'%(i))
+    
     decoder = Decoder((result, rest), b)
     
     naprawione = decoder.check()
