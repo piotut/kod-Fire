@@ -25,7 +25,8 @@ class Test(object):
 
     def check(self, repaired, msg):
         try:
-            if ((fc.GF2((self.inf+self.rest).value) + repaired).value).count(1) > 0:
+            suma = ((fc.GF2((self.inf+self.rest).value) + repaired).value).count(1)
+            if suma > 0:
                 print 'bledne dekodowanie: ' + msg
             else:
                 print 'wszystko ok: ' + msg
@@ -77,7 +78,7 @@ class Test(object):
             while diff < 40:
                 num = sample(range(0, 184), i)
                 diff = max(num)-min(num)
-
+            print diff
             zeros = [0 for x in range(224)]
             for j in num:
                 zeros[j] = 1
@@ -94,10 +95,11 @@ class Test(object):
             '''
         for i in range(2, 16):
             num = sample(range(0, 40), i)
+            #print num
             diff = max(num)-min(num)+1
-            #print diff, num
+            print diff
             num2 = randint(0,184-diff)
-
+            #print num2
             zeros = [0 for x in range(224)]
             for j in num:
                 zeros[j+num2] = 1
@@ -117,7 +119,8 @@ if __name__ == '__main__':
 
     inf = fc.GF2(''.join([str(randint(0,1)) for x in range(184)]))  #informacja
     gen = fc.GF2('10000000000000100100000100000000000001001')  #generator
-
+    print inf.value
+    
     encoder = fc.Encoder(inf, gen)
 
     (result, rest) = encoder.run()

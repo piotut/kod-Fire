@@ -80,7 +80,7 @@ class GF2(object):
         return GF2(self.deleteZeros(result))
 
 
-class Encoder(GF2):
+class Encoder(object):
     '''
     Koduje czesc informacyjna przy pomocy generatora
     '''
@@ -106,7 +106,7 @@ class Encoder(GF2):
 
         return (self.word, rest)
 
-class Decoder(GF2):
+class Decoder(object):
     ''' parametry GF2 '''
 
     def __init__(self, receive, generator):
@@ -133,6 +133,12 @@ class Decoder(GF2):
             #print 'Wystapil blad'
             #print 'Odebrane:\n' + str((self.recv + self.rest).value)
             ones = str(syndrom.value).count('1')
+            #sprawdzamy czy bity rozlozone na szerokosci nie wiekszej niz 12
+            if syndrom.value.count(1) > 1:
+                diff = len(syndrom.value) - syndrom.value[::-1].index(1) - syndrom.value.index(1)
+                if diff > 12:
+                    ones = 40
+
             (min_syn, iteracja, s) = (ones, 0, list(syndrom.value))
 
             t = 12  #zdolnosc korekcyjna
@@ -147,15 +153,19 @@ class Decoder(GF2):
 
                 syndrom = ((actual % self.gen) *p + self.rest % self.gen ) % self.gen % self.gen   
                 ones = syndrom.value.count(1)
-                    
+                #print ones
+                #if ones == 2:
+                #    print syndrom.value
+                #    print syndrom.value[12:].count(0)
                 sleep(0)
                 i = i+1
-                if(min_syn > ones):
+                if(min_syn > ones and syndrom.value[:-12].count(0) == 0):
                     (min_syn, iteracja, s) = (ones, i, list(syndrom.value))
-
+            
             correct = actual + self.rest
-            #print min_syn
-            #print iteracja
+            #print 'syndrom:' + str(min_syn)
+            #print 'iteracja:' + str(iteracja)
+            #print s
             if min_syn > 12:
                 #print 'Nie mozna poprawic bledow'
                 return
@@ -176,20 +186,36 @@ class Decoder(GF2):
 
 if __name__ == '__main__':
 
-    a = GF2(''.join([str(randint(0,1)) for x in range(184)]))  #informacja
+    #a = GF2(''.join([str(randint(0,1)) for x in range(184)]))  #informacja
     b = GF2('10000000000000100100000100000000000001001')  #generator
-
+    a = GF2(''.join([str(x) for x in [0, 1, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0,
+                                      1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0,
+                                      1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 0, 0, 1,
+                                      1, 0, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0,
+                                      1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1,
+                                      0, 1, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 1,
+                                      0, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1,
+                                      1, 1, 1, 0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0]]))
+    
     encoder=Encoder(a, b)
     
     (result, rest) = encoder.run()
 
     poprawny = GF2((result+rest).value)
-    print 'Wartosc zakodowana (wyslana):'
-    print poprawny.value
+    #print 'Wartosc zakodowana (wyslana):'
+    #print poprawny.value
     
-    rest = rest + GF2('10')
-    result.value[2] = result.value[2] ^ 1
-    result.value[37] = result.value[37] ^ 1
+    #rest = rest + GF2('10')
+    result.value[31] = result.value[31] ^ 1
+    result.value[38] = result.value[38] ^ 1
+    result.value[35] = result.value[35] ^ 1
+    result.value[47] = result.value[47] ^ 1
+    result.value[50] = result.value[50] ^ 1
+    result.value[69] = result.value[69] ^ 1
+
+    #result = result + GF2(''.join([str(x) for x in [1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0,
+    # 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1,
+    # 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 1, 1, 0, 1]]))
     ##zeros = ''.join(['0' for x in range(40)])
     ##result = result + GF2('111100000'+zeros)
     #num = randint(0, 184-5)
@@ -213,6 +239,6 @@ if __name__ == '__main__':
         print (poprawny + naprawione).value
         print 'liczba rozniacych sie bitow: ' + str(((poprawny + naprawione).value).count(1))
     except:
-        pass
+        print 'nie udalo sie'
 
     
